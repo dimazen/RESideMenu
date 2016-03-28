@@ -25,7 +25,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 #ifndef REUIKitIsFlatMode
 #define REUIKitIsFlatMode() RESideMenuUIKitIsFlatMode()
 #endif

@@ -24,7 +24,9 @@
 //
 
 #import <UIKit/UIKit.h>
+
 #import "UIViewController+RESideMenu.h"
+#import "RECommonFunctions.h"
 
 #ifndef IBInspectable
 #define IBInspectable
