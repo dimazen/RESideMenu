@@ -30,9 +30,9 @@
 @interface RESideMenu ()
 
 @property (strong, readwrite, nonatomic) UIImageView *backgroundImageView;
-@property (assign, readwrite, nonatomic) BOOL visible;
-@property (assign, readwrite, nonatomic) BOOL leftMenuVisible;
-@property (assign, readwrite, nonatomic) BOOL rightMenuVisible;
+@property (assign, readwrite, nonatomic, getter=isVisible) BOOL visible;
+@property (assign, readwrite, nonatomic, getter=isLeftMenuVisible) BOOL leftMenuVisible;
+@property (assign, readwrite, nonatomic, getter=isRightMenuVisible) BOOL rightMenuVisible;
 @property (assign, readwrite, nonatomic) CGPoint originalPoint;
 @property (strong, readwrite, nonatomic) UIButton *contentButton;
 @property (strong, readwrite, nonatomic) UIView *menuViewContainer;
@@ -271,6 +271,11 @@
 
 - (void)showLeftMenuViewController
 {
+	[self __showLeftMenuViewControllerWithVelocity:0];
+}
+
+- (void)__showLeftMenuViewControllerWithVelocity:(CGFloat)velocity
+{
     if (!self.leftMenuViewController) {
         return;
     }
@@ -280,9 +285,19 @@
     [self.view.window endEditing:YES];
     [self addContentButton];
     [self updateContentViewShadow];
-    [self resetContentViewScale];
-    
-    [UIView animateWithDuration:self.animationDuration animations:^{
+	[self resetContentViewScale];
+
+	BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
+	CGFloat targetContentViewContainerCenterX = isLandscape ? self.contentViewInLandscapeOffsetCenterX + CGRectGetHeight(self.view.frame) : self.contentViewInPortraitOffsetCenterX + CGRectGetWidth(self.view.frame);
+	CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+	CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
+	
+    [UIView animateWithDuration:self.animationDuration
+						  delay:0
+		 usingSpringWithDamping:1
+		  initialSpringVelocity:initalSpringVelocity
+						options:0
+					 animations:^{
         if (self.scaleContentView) {
             self.contentViewContainer.transform = CGAffineTransformMakeScale(self.contentViewScaleValue, self.contentViewScaleValue);
         } else {
@@ -318,6 +333,11 @@
 
 - (void)showRightMenuViewController
 {
+	[self __showRightMenuViewControllerWithVelocity:0];
+}
+
+- (void)__showRightMenuViewControllerWithVelocity:(CGFloat)velocity
+{
     if (!self.rightMenuViewController) {
         return;
     }
@@ -327,16 +347,26 @@
     [self.view.window endEditing:YES];
     [self addContentButton];
     [self updateContentViewShadow];
-    [self resetContentViewScale];
-    
+	[self resetContentViewScale];
+
+	BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
+	CGFloat targetContentViewContainerCenterX = isLandscape ? -self.contentViewInLandscapeOffsetCenterX : -self.contentViewInPortraitOffsetCenterX;
+	CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+	CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
+	
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
-    [UIView animateWithDuration:self.animationDuration animations:^{
+    [UIView animateWithDuration:self.animationDuration
+						  delay:0
+		 usingSpringWithDamping:1
+		  initialSpringVelocity:initalSpringVelocity
+						options:0
+					 animations:^{
         if (self.scaleContentView) {
             self.contentViewContainer.transform = CGAffineTransformMakeScale(self.contentViewScaleValue, self.contentViewScaleValue);
         } else {
             self.contentViewContainer.transform = CGAffineTransformIdentity;
         }
-        self.contentViewContainer.center = CGPointMake((UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]) ? -self.contentViewInLandscapeOffsetCenterX : -self.contentViewInPortraitOffsetCenterX), self.contentViewContainer.center.y);
+        self.contentViewContainer.center = CGPointMake(targetContentViewContainerCenterX, self.contentViewContainer.center.y);
         
         self.menuViewContainer.alpha = !self.fadeMenuView ?: 1.0f;
         self.contentViewContainer.alpha = self.contentViewFadeOutAlpha;
@@ -367,6 +397,11 @@
 }
 
 - (void)hideMenuViewControllerAnimated:(BOOL)animated
+{
+	[self hideMenuViewControllerAnimated:animated withVelocity:0];
+}
+
+- (void)hideMenuViewControllerAnimated:(BOOL)animated withVelocity:(CGFloat)velocity
 {
     BOOL rightMenuVisible = self.rightMenuVisible;
     UIViewController *visibleMenuViewController = rightMenuVisible ? self.rightMenuViewController : self.leftMenuViewController;
@@ -419,8 +454,17 @@
     };
     
     if (animated) {
+		CGFloat targetContentViewContainerCenterX = self.view.center.x;
+		CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+		CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
+		
         [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
-        [UIView animateWithDuration:self.animationDuration animations:^{
+        [UIView animateWithDuration:self.animationDuration
+							  delay:0
+			 usingSpringWithDamping:1
+			  initialSpringVelocity:initalSpringVelocity
+							options:0
+						 animations:^{
             animationBlock();
         } completion:^(BOOL finished) {
             [[UIApplication sharedApplication] endIgnoringInteractionEvents];
@@ -685,9 +729,10 @@
             [self hideMenuViewControllerAnimated:NO];
         }
         else {
-            if ([recognizer velocityInView:self.view].x > 0) {
+			CGFloat velocityX = [recognizer velocityInView:self.view].x;
+            if (velocityX > 0) {
                 if (self.contentViewContainer.frame.origin.x < 0) {
-                    [self hideMenuViewController];
+                    [self hideMenuViewControllerAnimated:YES withVelocity:velocityX];
                 } else {
                     if (self.leftMenuViewController) {
                         [self showLeftMenuViewController];
@@ -699,7 +744,7 @@
                         [self showRightMenuViewController];
                     }
                 } else {
-                    [self hideMenuViewController];
+                    [self hideMenuViewControllerAnimated:YES withVelocity:-velocityX];
                 }
             }
         }
