@@ -290,7 +290,7 @@
 
 	BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
 	CGFloat targetContentViewContainerCenterX = isLandscape ? self.contentViewInLandscapeOffsetCenterX + CGRectGetHeight(self.view.frame) : self.contentViewInPortraitOffsetCenterX + CGRectGetWidth(self.view.frame);
-	CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+	CGFloat distanceLeft = fabs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
 	CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
 	
     [UIView animateWithDuration:self.animationDuration
@@ -352,7 +352,7 @@
 
 	BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
 	CGFloat targetContentViewContainerCenterX = isLandscape ? -self.contentViewInLandscapeOffsetCenterX : -self.contentViewInPortraitOffsetCenterX;
-	CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+	CGFloat distanceLeft = fabs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
 	CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
 	
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
@@ -456,7 +456,7 @@
     
     if (animated) {
 		CGFloat targetContentViewContainerCenterX = self.view.center.x;
-		CGFloat distanceLeft = abs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
+		CGFloat distanceLeft = fabs(self.contentViewContainer.center.x - targetContentViewContainerCenterX);
 		CGFloat initalSpringVelocity = distanceLeft > 0 ? velocity / distanceLeft : 0;
 		
         [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
