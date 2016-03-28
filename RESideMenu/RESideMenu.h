@@ -34,11 +34,9 @@
 
 @interface RESideMenu : UIViewController <UIGestureRecognizerDelegate>
 
-#if __IPHONE_8_0
 @property (strong, readwrite, nonatomic) IBInspectable NSString *contentViewStoryboardID;
 @property (strong, readwrite, nonatomic) IBInspectable NSString *leftMenuViewStoryboardID;
 @property (strong, readwrite, nonatomic) IBInspectable NSString *rightMenuViewStoryboardID;
-#endif
 
 @property (strong, readwrite, nonatomic) UIViewController *contentViewController;
 @property (strong, readwrite, nonatomic) UIViewController *leftMenuViewController;
@@ -73,6 +71,10 @@
 @property (assign, readwrite, nonatomic) IBInspectable BOOL bouncesHorizontally;
 @property (assign, readwrite, nonatomic) UIStatusBarStyle menuPreferredStatusBarStyle;
 @property (assign, readwrite, nonatomic) IBInspectable BOOL menuPrefersStatusBarHidden;
+
+@property (assign, readonly, nonatomic, getter=isVisible) BOOL visible;
+@property (assign, readonly, nonatomic, getter=isLeftMenuVisible) BOOL leftMenuVisible;
+@property (assign, readonly, nonatomic, getter=isRightMenuVisible) BOOL rightMenuVisible;
 
 - (id)initWithContentViewController:(UIViewController *)contentViewController
              leftMenuViewController:(UIViewController *)leftMenuViewController
