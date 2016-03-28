@@ -439,6 +439,8 @@
                }
             );
         }
+        
+        [strongSelf statusBarNeedsAppearanceUpdate];
     };
     void (^completionBlock)(void) = ^{
         __typeof (weakSelf) __strong strongSelf = weakSelf;
@@ -446,8 +448,6 @@
             return;
         }
         [visibleMenuViewController endAppearanceTransition];
-        [self statusBarNeedsAppearanceUpdate];
-
         if (!strongSelf.visible && [strongSelf.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [strongSelf.delegate respondsToSelector:@selector(sideMenu:didHideMenuViewController:)]) {
             [strongSelf.delegate sideMenu:strongSelf didHideMenuViewController:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
         }
