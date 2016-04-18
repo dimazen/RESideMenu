@@ -250,6 +250,24 @@
 #pragma mark -
 #pragma mark Private methods
 
+- (void)spreadDelegateMethod:(SEL)method withParameter:(id)parameter {
+    NSArray *viewControllers = @[self.leftMenuViewController, self.rightMenuViewController, self.contentViewController];
+    for (UIViewController *viewController in viewControllers) {
+        UIViewController *receiverViewController = viewController;
+        if ([viewController isKindOfClass:[UINavigationController class]]) {
+            UINavigationController *navigationController = (UINavigationController *)viewController;
+            receiverViewController = navigationController.topViewController;
+        }
+        
+        if ([receiverViewController conformsToProtocol:@protocol(RESideMenuDelegate)] && [receiverViewController respondsToSelector:method]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            [receiverViewController performSelector:method withObject:self withObject:parameter];
+#pragma clang diagnostic pop
+        }
+    }
+}
+
 - (void)presentMenuViewContainerWithMenuViewController:(UIViewController *)menuViewController
 {
     self.menuViewContainer.transform = CGAffineTransformIdentity;
@@ -268,6 +286,7 @@
     if ([self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willShowMenuViewController:)]) {
         [self.delegate sideMenu:self willShowMenuViewController:menuViewController];
     }
+    [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:menuViewController];
 }
 
 - (void)showLeftMenuViewController
@@ -324,6 +343,7 @@
         if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didShowMenuViewController:)]) {
             [self.delegate sideMenu:self didShowMenuViewController:self.leftMenuViewController];
         }
+        [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.leftMenuViewController];
         
         self.visible = YES;
         self.leftMenuVisible = YES;
@@ -380,6 +400,7 @@
         if (!self.rightMenuVisible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didShowMenuViewController:)]) {
             [self.delegate sideMenu:self didShowMenuViewController:self.rightMenuViewController];
         }
+        [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.rightMenuViewController];
         
         self.visible = !(self.contentViewContainer.frame.size.width == self.view.bounds.size.width && self.contentViewContainer.frame.size.height == self.view.bounds.size.height && self.contentViewContainer.frame.origin.x == 0 && self.contentViewContainer.frame.origin.y == 0);
         self.rightMenuVisible = self.visible;
@@ -410,6 +431,7 @@
     if ([self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willHideMenuViewController:)]) {
         [self.delegate sideMenu:self willHideMenuViewController:rightMenuVisible ? self.rightMenuViewController : self.leftMenuViewController];
     }
+    [self spreadDelegateMethod:@selector(sideMenu:willHideMenuViewController:) withParameter:rightMenuVisible ? self.rightMenuViewController : self.leftMenuViewController];
     
     self.visible = NO;
     self.leftMenuVisible = NO;
@@ -452,6 +474,7 @@
         if (!strongSelf.visible && [strongSelf.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [strongSelf.delegate respondsToSelector:@selector(sideMenu:didHideMenuViewController:)]) {
             [strongSelf.delegate sideMenu:strongSelf didHideMenuViewController:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
         }
+        [self spreadDelegateMethod:@selector(sideMenu:didHideMenuViewController:) withParameter:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
     };
     
     if (animated) {
@@ -598,8 +621,10 @@
 
 - (void)panGestureRecognized:(UIPanGestureRecognizer *)recognizer
 {
-    if ([self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didRecognizePanGesture:)])
+    if ([self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didRecognizePanGesture:)]) {
         [self.delegate sideMenu:self didRecognizePanGesture:recognizer];
+    }
+    [self spreadDelegateMethod:@selector(sideMenu:didRecognizePanGesture:) withParameter:recognizer];
     
     if (!self.panGestureEnabled) {
         return;
@@ -682,11 +707,13 @@
                 if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willShowMenuViewController:)]) {
                     [self.delegate sideMenu:self willShowMenuViewController:self.leftMenuViewController];
                 }
+                [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.leftMenuViewController];
             }
             if (point.x < 0) {
                 if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willShowMenuViewController:)]) {
                     [self.delegate sideMenu:self willShowMenuViewController:self.rightMenuViewController];
                 }
+                [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.rightMenuViewController];
             }
             self.didNotifyDelegate = YES;
         }
