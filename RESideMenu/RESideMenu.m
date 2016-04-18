@@ -251,7 +251,17 @@
 #pragma mark Private methods
 
 - (void)spreadDelegateMethod:(SEL)method withParameter:(id)parameter {
-    NSArray *viewControllers = @[self.leftMenuViewController, self.rightMenuViewController, self.contentViewController];
+    NSMutableArray *viewControllers = [NSMutableArray new];
+    if (self.leftMenuViewController) {
+        [viewControllers addObject: self.leftMenuViewController];
+    }
+    if (self.rightMenuViewController) {
+        [viewControllers addObject: self.rightMenuViewController];
+    }
+    if (self.contentViewController) {
+        [viewControllers addObject: self.contentViewController];
+    }
+    
     for (UIViewController *viewController in viewControllers) {
         UIViewController *receiverViewController = viewController;
         if ([viewController isKindOfClass:[UINavigationController class]]) {
