@@ -353,7 +353,9 @@
         if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didShowMenuViewController:)]) {
             [self.delegate sideMenu:self didShowMenuViewController:self.leftMenuViewController];
         }
-        [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.leftMenuViewController];
+        if (!self.visible) {
+            [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.leftMenuViewController];
+        }
         
         self.visible = YES;
         self.leftMenuVisible = YES;
@@ -410,7 +412,9 @@
         if (!self.rightMenuVisible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:didShowMenuViewController:)]) {
             [self.delegate sideMenu:self didShowMenuViewController:self.rightMenuViewController];
         }
-        [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.rightMenuViewController];
+        if (!self.rightMenuVisible) {
+            [self spreadDelegateMethod:@selector(sideMenu:didShowMenuViewController:) withParameter:self.rightMenuViewController];
+        }
         
         self.visible = !(self.contentViewContainer.frame.size.width == self.view.bounds.size.width && self.contentViewContainer.frame.size.height == self.view.bounds.size.height && self.contentViewContainer.frame.origin.x == 0 && self.contentViewContainer.frame.origin.y == 0);
         self.rightMenuVisible = self.visible;
@@ -484,7 +488,9 @@
         if (!strongSelf.visible && [strongSelf.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [strongSelf.delegate respondsToSelector:@selector(sideMenu:didHideMenuViewController:)]) {
             [strongSelf.delegate sideMenu:strongSelf didHideMenuViewController:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
         }
-        [self spreadDelegateMethod:@selector(sideMenu:didHideMenuViewController:) withParameter:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
+        if (!strongSelf.visible) {
+            [self spreadDelegateMethod:@selector(sideMenu:didHideMenuViewController:) withParameter:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
+        }
     };
     
     if (animated) {
@@ -717,13 +723,17 @@
                 if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willShowMenuViewController:)]) {
                     [self.delegate sideMenu:self willShowMenuViewController:self.leftMenuViewController];
                 }
-                [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.leftMenuViewController];
+                if (!self.visible) {
+                    [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.leftMenuViewController];
+                }
             }
             if (point.x < 0) {
                 if (!self.visible && [self.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [self.delegate respondsToSelector:@selector(sideMenu:willShowMenuViewController:)]) {
                     [self.delegate sideMenu:self willShowMenuViewController:self.rightMenuViewController];
                 }
-                [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.rightMenuViewController];
+                if (!self.visible) {
+                    [self spreadDelegateMethod:@selector(sideMenu:willShowMenuViewController:) withParameter:self.rightMenuViewController];
+                }
             }
             self.didNotifyDelegate = YES;
         }
